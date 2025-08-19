@@ -90,4 +90,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'barber-shop-3d056.firebasestorage.app',
     measurementId: 'G-QY53CV64XJ',
   );
+
 }
