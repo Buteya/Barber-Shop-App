@@ -20,6 +20,11 @@ class User {
   // list of all users
   List<User> users = [];
 
+  // method that returns a specif user
+  User getUser(int index){
+    return users.elementAt(index);
+  }
+
   // method to add a new user and default values for parameters that are not required
   String createNewUser(
     String username,
