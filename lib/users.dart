@@ -3,28 +3,32 @@ import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart';
 
 class User with ChangeNotifier {
+  String? id;
   String? username;
   String? email;
   String? password;
   String? phoneNumber;
   String? country;
   String? city;
+  DateTime? createdAt;
 
   User({
+    @required id,
     @required username,
     @required email,
     @required password,
     @required phoneNumber,
     country,
     city,
+    createdAt,
   });
 
   // cloud firestore instance
   final _firestore = FirebaseFirestore.instance;
-
-
 
   // list of all users internal private state
   final List<User> _users = [];
@@ -55,33 +59,43 @@ class User with ChangeNotifier {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         // Handle weak password error
+        return 'password is weak';
       } else if (e.code == 'email-already-in-use') {
         // Handle email already in use error
+        return 'email already in use';
       }
       // Handle other FirebaseAuthExceptions
+      return e.message!;
     } catch (e) {
       // Handle general errors
+      return 'error';
     }
     // the current firebase user
     final firebaseUser = FirebaseAuth.instance.currentUser;
+    final userId = Uuid().v4();
+    final userCreatedAt = DateFormat('EEE, MMM d, y').format(DateTime.now());
 
     Map<String, dynamic> userData = {
+      'id':userId,
       'username': username,
       'email': email,
       'password': password,
       'phoneNumber': phoneNumber,
       'country': country,
       'city': city,
+      'createdAt': userCreatedAt,
     };
 
     // variable to store user
     User user = User(
+      id: userId,
       username: username,
       email: firebaseUser!.email ?? email,
       password: password,
       phoneNumber: phoneNumber,
       country: country,
       city: city,
+      createdAt: userCreatedAt,
     );
     // check if the required user properties are empty
     if (username.isNotEmpty &&
@@ -92,7 +106,7 @@ class User with ChangeNotifier {
       _users.add(user);
 
       // Example using set() with a specific document ID
-      await _firestore.collection('users').doc(firebaseUser.uid).set(userData);
+      await _firestore.collection('users').doc(userId).set(userData);
 
       // notify listening widgets to rebuild
       notifyListeners();

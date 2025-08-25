@@ -14,7 +14,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(
           create: (context) =>
-              User(username: '', email: '', password: '', phoneNumber: ''),
+              User(id: '',username: '', email: '', password: '', phoneNumber: '',),
         ),
       ],
       child: const MyApp(),
