@@ -15,6 +15,7 @@ class User with ChangeNotifier {
   String? country;
   String? city;
   DateTime? createdAt;
+  bool? isOnline;
 
   User({
     @required id,
@@ -25,6 +26,7 @@ class User with ChangeNotifier {
     country,
     city,
     createdAt,
+    isOnline,
   });
 
   // cloud firestore instance
@@ -73,10 +75,12 @@ class User with ChangeNotifier {
     // the current firebase user
     final firebaseUser = FirebaseAuth.instance.currentUser;
     final userId = Uuid().v4();
-    final userCreatedAt = DateFormat('EEE, MMM d, y').format(DateTime.now());
+    final userCreatedAt = DateFormat(
+      'EEE, MMM d, y hh:mm aaa',
+    ).format(DateTime.now());
 
     Map<String, dynamic> userData = {
-      'id':userId,
+      'id': userId,
       'username': username,
       'email': email,
       'password': password,
@@ -143,7 +147,12 @@ class User with ChangeNotifier {
       // notify listening widgets to rebuild
       notifyListeners();
       // check if user is still there
-      if (_users.contains(_users[index])) {
+      if (_users[index].username == username ||
+          _users[index].email == email ||
+          _users[index].password == password ||
+          _users[index].phoneNumber == phoneNumber ||
+          _users[index].country == country ||
+          _users[index].city == city) {
         return "user updated successfully";
       } else {
         return "failed to update user";
