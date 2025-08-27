@@ -9,7 +9,7 @@ class Barber {
   String? firstname;
   String? lastname;
   String? mobileNumber;
-  String? speciality;
+  String? specialityId;
   Double? salary;
   bool? isFree;
   bool? isOnHoliday;
@@ -89,12 +89,12 @@ class Barber {
       // update individual values in barber
       barbers[index].firstname = firstname ??  barbers[index].firstname;
       barbers[index].lastname = lastname ??  barbers[index].lastname;
-      barbers[index].speciality = speciality ??  barbers[index].speciality;
+      barbers[index].specialityId = speciality ??  barbers[index].specialityId;
       barbers[index].salary = (salary ??  barbers[index].salary);
       // check if updates were successful
       if(barbers[index].firstname == firstname ||
          barbers[index].lastname == lastname ||
-         barbers[index].speciality == speciality ||
+         barbers[index].specialityId == speciality ||
          barbers[index].salary == salary){
         return 'barber was updated successfully';
       }else {

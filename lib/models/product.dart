@@ -6,8 +6,8 @@ import 'package:intl/intl.dart';
 
 class Product {
   String? id;
+  String? supplierId;
   String? name;
-  String? supplierName;
   Double? price;
   Int? quantity;
   Bool? isAvailable;
@@ -16,8 +16,8 @@ class Product {
 
   Product({
     @required id,
+    @required supplierId,
     @required name,
-    @required supplierName,
     @required price,
     @required quantity,
     isAvailable,
@@ -34,13 +34,13 @@ class Product {
 
   // function to create new product
   String createNewProduct(
+      String supplierId,
     String name,
-    String supplierName,
     Double price,
     int quantity,
   ) {
-    if (name.isNotEmpty &&
-        supplierName.isNotEmpty &&
+    if ( supplierId.isNotEmpty &&
+        name.isNotEmpty &&
         price != 0.0 &&
         quantity != 0) {
       // new productId
@@ -53,8 +53,8 @@ class Product {
       //new product constructor
       Product newProduct = Product(
         id: productId,
+        supplierId: supplierId,
         name: name,
-        supplierName: supplierName,
         price: price,
         quantity: quantity,
         isAvailable: true,
@@ -88,13 +88,10 @@ class Product {
     // check if product exists
     if (products.contains(products[index])) {
       products[index].name = name ?? products[index].name;
-      products[index].supplierName =
-          supplierName ?? products[index].supplierName;
       products[index].price = price ?? products[index].price;
       products[index].quantity = (quantity ?? products[index].quantity) as Int?;
       // check if product updated
       if (products[index].name == name ||
-          products[index].supplierName == supplierName ||
           products[index].price == price ||
           products[index].quantity == quantity) {
         return 'product updated successfully';

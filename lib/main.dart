@@ -1,10 +1,10 @@
-import 'package:barbershop/signin.dart';
-import 'package:barbershop/users.dart';
+import 'package:barbershop/screens/signin.dart';
+import 'package:barbershop/models/users.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'firebase_options.dart';
+import 'utilities/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

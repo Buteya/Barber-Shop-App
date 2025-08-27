@@ -1,4 +1,4 @@
-import 'package:barbershop/users.dart';
+import 'package:barbershop/models/users.dart';
 import 'package:flutter/material.dart';
 
 class SignIn extends StatelessWidget {
@@ -22,9 +22,11 @@ class SignIn extends StatelessWidget {
       body: Form(
         key: formKey,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          padding:  EdgeInsets.symmetric(vertical: 8.0, horizontal: MediaQuery.widthOf(context)*.2718),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              CircleAvatar(radius:MediaQuery.widthOf(context)*.09,backgroundImage: AssetImage('assets/images/barber shop logo.png'),),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Username'),
                 validator: (value) {
@@ -77,20 +79,23 @@ class SignIn extends StatelessWidget {
                   password = value;
                 },
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (formKey.currentState!.validate()) {
-                    // All fields are valid, proceed to save or submit
-                    formKey.currentState!.save(); // Triggers onSaved callbacks
-                    // Perform submission logic
-                    print(username);
-                    print(email);
-                    print(password);
-                    print(phoneNumber);
-                    user!.createNewUser(username, email, password, phoneNumber);
-                  }
-                },
-                child: Text('Submit'),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      // All fields are valid, proceed to save or submit
+                      formKey.currentState!.save(); // Triggers onSaved callbacks
+                      // Perform submission logic
+                      print(username);
+                      print(email);
+                      print(password);
+                      print(phoneNumber);
+                      user!.createNewUser(username, email, password, phoneNumber);
+                    }
+                  },
+                  child: Text('Sign in'),
+                ),
               ),
             ],
           ),
