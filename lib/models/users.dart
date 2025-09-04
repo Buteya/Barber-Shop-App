@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 
@@ -29,6 +30,15 @@ class User with ChangeNotifier {
     isOnline,
   });
 
+  //sharedPreferences with cache
+   final Future<SharedPreferencesWithCache> _prefs =  SharedPreferencesWithCache.create(
+      cacheOptions: const SharedPreferencesWithCacheOptions(
+        // This cache will only accept the key 'counter'.
+          allowList: <String>{'userId'}));
+
+  //firebase user
+  final  _user = FirebaseAuth.instance.currentUser;
+
   // cloud firestore instance
   final _firestore = FirebaseFirestore.instance;
 
@@ -52,7 +62,10 @@ class User with ChangeNotifier {
     String country = "N/A",
     String city = "N/A",
   }) async {
-    try {
+    final userId = Uuid().v4();
+    final userPrefs = await _prefs ;
+    if(userPrefs.getString('userId') != userId){
+      try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email, // Get email from text field
         password: password, // Get password from text field
@@ -72,9 +85,7 @@ class User with ChangeNotifier {
       // Handle general errors
       return 'error';
     }
-    // the current firebase user
-    final firebaseUser = FirebaseAuth.instance.currentUser;
-    final userId = Uuid().v4();
+
     final userCreatedAt = DateFormat(
       'EEE, MMM d, y hh:mm aaa',
     ).format(DateTime.now());
@@ -88,29 +99,35 @@ class User with ChangeNotifier {
       'country': country,
       'city': city,
       'createdAt': userCreatedAt,
+      'isOnline':false,
     };
 
     // variable to store user
     User user = User(
       id: userId,
       username: username,
-      email: firebaseUser!.email ?? email,
+      email: FirebaseAuth.instance.currentUser!.email ?? email,
       password: password,
       phoneNumber: phoneNumber,
       country: country,
       city: city,
       createdAt: userCreatedAt,
+      isOnline: false,
     );
     // check if the required user properties are empty
     if (username.isNotEmpty &&
         email.isNotEmpty &&
         password.isNotEmpty &&
         phoneNumber.isNotEmpty) {
+      //cache the id of the new user to shared preferences
+      userPrefs.setString("userId", userId);
+      final newPrefs = await SharedPreferences.getInstance();
+      newPrefs.setString('newUserId', userId);
       // add the user
       _users.add(user);
 
       // Example using set() with a specific document ID
-      await _firestore.collection('users').doc(userId).set(userData);
+      await _firestore.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).set(userData);
 
       // notify listening widgets to rebuild
       notifyListeners();
@@ -122,6 +139,35 @@ class User with ChangeNotifier {
       }
     } else {
       return "no empty fields allowed";
+    }
+    }else{
+      return "user already exists ";
+    }
+  }
+
+  //method for login user
+  void loginUser(String email,String password) async{
+    final userPrefs = await _prefs;
+    final userId = userPrefs.getString("userId");
+    final newPrefs = await SharedPreferences.getInstance();
+    final newUserId = newPrefs.getString('newUserId');
+    if(email.isNotEmpty && password.isNotEmpty){
+        FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+        if(FirebaseAuth.instance.currentUser != null){
+          final collectionRef = FirebaseFirestore.instance.collection('users');
+          print(FirebaseAuth.instance.currentUser!.uid);
+          final docRef = collectionRef.doc(FirebaseAuth.instance.currentUser!.uid);
+          final docSnapshot = await docRef.get();
+          if(docSnapshot.exists){
+            final data = docSnapshot.data();
+            print(data);
+            await docRef.update({
+              'isOnline': true,
+            });
+        }
+      }else{
+        print("document not found");
+      }
     }
   }
 
