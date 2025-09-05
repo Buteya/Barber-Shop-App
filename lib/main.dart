@@ -1,3 +1,5 @@
+import 'package:barbershop/screens/404.dart';
+import 'package:barbershop/screens/home.dart';
 import 'package:barbershop/screens/login.dart';
 import 'package:barbershop/screens/signin.dart';
 import 'package:barbershop/models/users.dart';
@@ -35,6 +37,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/signin': (context) => SignIn(),
         '/login': (context) => Login(),
+        '/home': (context) => Home(),
+        '/pagenotfound': (context) => PageNotFound(),
       },
       title: 'Barber Shop',
       theme: ThemeData(

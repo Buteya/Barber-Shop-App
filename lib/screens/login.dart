@@ -96,6 +96,7 @@ class _LoginState extends State<Login> {
                             final data = docSnapshot.data();
                             print(data);
                           }
+                          Navigator.of(context).pushNamed('/home');
                         }
                       } on TimeoutException catch (e) {
                         // Handles a specific type of exception (e.g., FormatException)
