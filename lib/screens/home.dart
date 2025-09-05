@@ -113,7 +113,7 @@ class _HomeState extends State<Home> {
               ],
             ),
             Padding(
-              padding:  EdgeInsets.only(top: MediaQuery.heightOf(context) * .13),
+              padding:  EdgeInsets.only(top: MediaQuery.heightOf(context) * .008),
               child: Text(textAlign: TextAlign.center,"""
             📅 Book. Sit. Shine.
 Our easy-to-use booking system lets you pick your preferred barber, time slot, and service—all in just a few clicks. No guesswork, no hassle. Just great hair, on your schedule.

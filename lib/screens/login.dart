@@ -96,7 +96,7 @@ class _LoginState extends State<Login> {
                             final data = docSnapshot.data();
                             print(data);
                           }
-                          Navigator.of(context).pushNamed('/home');
+
                         }
                       } on TimeoutException catch (e) {
                         // Handles a specific type of exception (e.g., FormatException)
@@ -143,6 +143,7 @@ class _LoginState extends State<Login> {
                           ),
                         ));
                       }
+                      Navigator.of(context).pushNamed('/home');
                       formKey.currentState!.reset();
                     }
                   },
