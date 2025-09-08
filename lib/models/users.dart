@@ -245,4 +245,21 @@ class User with ChangeNotifier {
       return "failed to delete all users";
     }
   }
+
+  Future<String?> getUserName()async{
+    final collectionRef = FirebaseFirestore.instance.collection('users');
+    final newUserId = FirebaseAuth.instance.currentUser!.uid;
+    print(newUserId);
+    final docRef = collectionRef.doc(newUserId);
+    final docSnapshot = await docRef.get();
+    if(docSnapshot.exists){
+      final data = docSnapshot.data();
+      print(data);
+      print(data!['username']);
+      return  data!['username'] as String?;
+    }else{
+      return 'null';
+    }
+
+  }
 }

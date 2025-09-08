@@ -1,4 +1,5 @@
 import 'package:barbershop/screens/404.dart';
+import 'package:barbershop/screens/dashboard.dart';
 import 'package:barbershop/screens/home.dart';
 import 'package:barbershop/screens/login.dart';
 import 'package:barbershop/screens/signin.dart';
@@ -16,8 +17,14 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) =>
-              User(id: '',username: '', email: '', password: '', phoneNumber: '',isOnline: false,),
+          create: (context) => User(
+            id: '',
+            username: '',
+            email: '',
+            password: '',
+            phoneNumber: '',
+            isOnline: false,
+          ),
         ),
       ],
       child: const MyApp(),
@@ -39,6 +46,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => Login(),
         '/home': (context) => Home(),
         '/pagenotfound': (context) => PageNotFound(),
+        '/dashboard': (context) => Dashboard(),
       },
       title: 'Barber Shop',
       theme: ThemeData(
