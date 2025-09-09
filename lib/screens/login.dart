@@ -13,6 +13,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final firebaseAuth = FirebaseAuth.instance;
   bool isLoading = false;
   @override
   Widget build(BuildContext context) {
@@ -85,10 +86,10 @@ class _LoginState extends State<Login> {
                           isLoading = true;
                         });
                         // Code that might throw an exception
-                        user.loginUser(email, password);
-                        if(FirebaseAuth.instance.currentUser != null){
+                        user.loginUser(email, password,context);
+                        if(firebaseAuth.currentUser != null){
                           final collectionRef = FirebaseFirestore.instance.collection('users');
-                          final newUserId = FirebaseAuth.instance.currentUser!.uid;
+                          final newUserId = firebaseAuth.currentUser!.uid;
                           print(newUserId);
                           final docRef = collectionRef.doc(newUserId);
                           final docSnapshot = await docRef.get();
@@ -96,7 +97,17 @@ class _LoginState extends State<Login> {
                             final data = docSnapshot.data();
                             print(data);
                           }
-
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: const Text('login successful!'),
+                            duration: const Duration(seconds: 3), // Optional: set duration
+                            action: SnackBarAction( // Optional: add an action button
+                              label: 'close',
+                              onPressed: () {
+                                // Perform an action when the "Undo" button is pressed
+                                print('close action performed!');
+                              },
+                            ),
+                          ));
                         }
                       } on TimeoutException catch (e) {
                         // Handles a specific type of exception (e.g., FormatException)
@@ -125,25 +136,7 @@ class _LoginState extends State<Login> {
                             },
                           ),
                         ));
-                      } finally {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        // Code that always executes, regardless of whether an exception occurred
-                        print('Finally block executed.');
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: const Text('user login successfully'),
-                          duration: const Duration(seconds: 3), // Optional: set duration
-                          action: SnackBarAction( // Optional: add an action button
-                            label: 'Undo',
-                            onPressed: () {
-                              // Perform an action when the "Undo" button is pressed
-                              print('Undo action performed!');
-                            },
-                          ),
-                        ));
                       }
-                      Navigator.of(context).pushNamed('/home');
                       formKey.currentState!.reset();
                     }
                   },

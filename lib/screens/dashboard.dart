@@ -1,3 +1,4 @@
+import 'package:barbershop/screens/404.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:barbershop/models/users.dart' as usr;
@@ -10,83 +11,122 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  User? user = FirebaseAuth.instance.currentUser;
+  final usrR = usr.User(
+    id: '',
+    username: '',
+    email: '',
+    password: '',
+    phoneNumber: '',
+  );
+  String username = '';
+  bool isUsername = false;
+
+  Future<void> getUser() async {
+    setState(() {
+      isUsername = true;
+    });
+    var userNew = await usrR.getUserName(user!.uid);
+    setState(() {
+      username = userNew!;
+      isUsername = false;
+    });
+
+    setState(() {
+      isUsername = false;
+    });
+  }
+
+  @override
+  initState() {
+    // TODO: implement initState
+    super.initState();
+    getUser();
+  }
+
   @override
   Widget build(BuildContext context) {
-    User? user;
-    final usrR = usr.User(
-      id: '',
-      username: '',
-      email: '',
-      password: '',
-      phoneNumber: '',
-    );
-    String username = '';
-    bool isUsername = false;
-    Future<void> getUser() async {
-      if(user != null){
-        setState(() {
-          isUsername = true;
-        });
-        var userNew = await usrR.getUserName();
-        if(mounted){
-          setState(() async {
-            username = userNew!;
-            isUsername = false;
-          });
-        }
-        setState(() {
-          isUsername = false;
-        });
-      }
-
-
-    }
-
-    @override
-    initState() {
-      // TODO: implement initState
-      super.initState();
-      user = FirebaseAuth.instance.currentUser;
-      getUser();
-    }
-    return Scaffold(appBar:AppBar(
-      actions: [
-        user != null
-            ? InkWell(
-          onTap: () {
-            Navigator.of(context).pushNamed('/dashboard');
-          },
-          child: Row(
-            children: [
-              isUsername?CircularProgressIndicator():Text(username),
-              SizedBox(width: MediaQuery.widthOf(context) * 0.01),
-              InkWell(child: CircleAvatar(child: Icon(Icons.person))),
-            ],
-          ),
-        )
-            : InkWell(
-          onTap: () {
-            Navigator.of(context).pushNamed('/login');
-          },
-          child: Text('login'),
-        ),
-        SizedBox(width: MediaQuery.widthOf(context) * .02),
-      ],
-      automaticallyImplyLeading: true,
-      toolbarHeight: MediaQuery.heightOf(context) * .16,
-      centerTitle: true,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            radius: MediaQuery.widthOf(context) * .03,
-            backgroundImage: AssetImage('assets/images/barber shop logo.png'),
-          ),
-          SizedBox(width: MediaQuery.widthOf(context) * 0.01),
-          Text('Barber shop'),
+    return user == null?PageNotFound():Scaffold(
+      appBar: AppBar(
+        actions: [
+          user != null
+              ? InkWell(
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/dashboard');
+                  },
+                  child: Row(
+                    children: [
+                      isUsername
+                          ? Center(child: CircularProgressIndicator())
+                          : Text(username),
+                      SizedBox(width: MediaQuery.widthOf(context) * 0.01),
+                      InkWell(child: CircleAvatar(child: Icon(Icons.person))),
+                    ],
+                  ),
+                )
+              : InkWell(
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/login');
+                  },
+                  child: Text('login'),
+                ),
+          SizedBox(width: MediaQuery.widthOf(context) * .02),
         ],
+        automaticallyImplyLeading: true,
+        toolbarHeight: MediaQuery.heightOf(context) * .16,
+        centerTitle: true,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: MediaQuery.widthOf(context) * .03,
+              backgroundImage: AssetImage('assets/images/barber shop logo.png'),
+            ),
+            SizedBox(width: MediaQuery.widthOf(context) * 0.01),
+            Text('Barber shop'),
+          ],
+        ),
       ),
-    ),drawer: Drawer(),);
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero, // Remove default padding
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Text('Drawer Header'),
+            ),
+            ListTile(
+              title: const Text('create user'),
+              onTap: () {
+                // Handle item 1 tap
+                Navigator.pop(context); // Close the drawer
+              },
+            ),
+            ListTile(
+              title: const Text('create barber'),
+              onTap: () {
+                // Handle item 2 tap
+                Navigator.pop(context); // Close the drawer
+              },
+            ),
+            ListTile(
+              title: const Text('create product'),
+              onTap: () {
+                // Handle item 2 tap
+                Navigator.pop(context); // Close the drawer
+              },
+            ),
+            ListTile(
+              title: const Text('create appointment'),
+              onTap: () {
+                // Handle item 2 tap
+                Navigator.pop(context); // Close the drawer
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

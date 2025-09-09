@@ -20,31 +20,30 @@ class _HomeState extends State<Home> {
   );
   String username = '';
   bool isUsername = false;
+
   Future<void> getUser() async {
-    if(user != null){
-      setState(() {
-        isUsername = true;
-      });
-      var userNew = await usrR.getUserName();
-      if(mounted){
-        setState(() async {
-          username = userNew!;
-          isUsername = false;
-        });
-      }
-      setState(() {
-        isUsername = false;
-      });
-    }
+    setState(() {
+      user = FirebaseAuth.instance.currentUser;
+    });
 
+    setState(() {
+      isUsername = true;
+    });
+    var userNew = await usrR.getUserName(user!.uid);
+    setState(() {
+      username = userNew!;
+      isUsername = false;
+    });
 
+    setState(() {
+      isUsername = false;
+    });
   }
 
   @override
   initState() {
     // TODO: implement initState
     super.initState();
-    user = FirebaseAuth.instance.currentUser;
     getUser();
   }
 
@@ -60,7 +59,9 @@ class _HomeState extends State<Home> {
                   },
                   child: Row(
                     children: [
-                      isUsername?CircularProgressIndicator():Text(username),
+                      isUsername
+                          ? Center(child: CircularProgressIndicator())
+                          : Text(username),
                       SizedBox(width: MediaQuery.widthOf(context) * 0.01),
                       InkWell(child: CircleAvatar(child: Icon(Icons.person))),
                     ],

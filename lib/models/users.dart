@@ -31,13 +31,16 @@ class User with ChangeNotifier {
   });
 
   //sharedPreferences with cache
-   final Future<SharedPreferencesWithCache> _prefs =  SharedPreferencesWithCache.create(
-      cacheOptions: const SharedPreferencesWithCacheOptions(
-        // This cache will only accept the key 'counter'.
-          allowList: <String>{'userId'}));
+  final Future<SharedPreferencesWithCache> _prefs =
+      SharedPreferencesWithCache.create(
+        cacheOptions: const SharedPreferencesWithCacheOptions(
+          // This cache will only accept the key 'counter'.
+          allowList: <String>{'userId'},
+        ),
+      );
 
   //firebase user
-  final  _user = FirebaseAuth.instance.currentUser;
+  final _user = FirebaseAuth.instance.currentUser;
 
   // cloud firestore instance
   final _firestore = FirebaseFirestore.instance;
@@ -63,111 +66,119 @@ class User with ChangeNotifier {
     String city = "N/A",
   }) async {
     final userId = Uuid().v4();
-    final userPrefs = await _prefs ;
-    if(userPrefs.getString('userId') != userId){
+    final userPrefs = await _prefs;
+    if (userPrefs.getString('userId') != userId) {
       try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email, // Get email from text field
-        password: password, // Get password from text field
-      );
-      // User created successfully, handle navigation or show success message
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        // Handle weak password error
-        return 'password is weak';
-      } else if (e.code == 'email-already-in-use') {
-        // Handle email already in use error
-        return 'email already in use';
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email, // Get email from text field
+          password: password, // Get password from text field
+        );
+        // User created successfully, handle navigation or show success message
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'weak-password') {
+          // Handle weak password error
+          return 'password is weak';
+        } else if (e.code == 'email-already-in-use') {
+          // Handle email already in use error
+          return 'email already in use';
+        }
+        // Handle other FirebaseAuthExceptions
+        return e.message!;
+      } catch (e) {
+        // Handle general errors
+        return 'error';
       }
-      // Handle other FirebaseAuthExceptions
-      return e.message!;
-    } catch (e) {
-      // Handle general errors
-      return 'error';
-    }
 
-    final userCreatedAt = DateFormat(
-      'EEE, MMM d, y hh:mm aaa',
-    ).format(DateTime.now());
+      final userCreatedAt = DateFormat(
+        'EEE, MMM d, y hh:mm aaa',
+      ).format(DateTime.now());
 
-    Map<String, dynamic> userData = {
-      'id': userId,
-      'username': username,
-      'email': email,
-      'password': password,
-      'phoneNumber': phoneNumber,
-      'country': country,
-      'city': city,
-      'createdAt': userCreatedAt,
-      'isOnline':false,
-    };
+      Map<String, dynamic> userData = {
+        'id': userId,
+        'username': username,
+        'email': email,
+        'password': password,
+        'phoneNumber': phoneNumber,
+        'country': country,
+        'city': city,
+        'createdAt': userCreatedAt,
+        'isOnline': false,
+      };
 
-    // variable to store user
-    User user = User(
-      id: userId,
-      username: username,
-      email: FirebaseAuth.instance.currentUser!.email ?? email,
-      password: password,
-      phoneNumber: phoneNumber,
-      country: country,
-      city: city,
-      createdAt: userCreatedAt,
-      isOnline: false,
-    );
-    // check if the required user properties are empty
-    if (username.isNotEmpty &&
-        email.isNotEmpty &&
-        password.isNotEmpty &&
-        phoneNumber.isNotEmpty) {
-      //cache the id of the new user to shared preferences
-      userPrefs.setString("userId", userId);
-      final newPrefs = await SharedPreferences.getInstance();
-      newPrefs.setString('newUserId', userId);
-      // add the user
-      _users.add(user);
+      // variable to store user
+      User user = User(
+        id: userId,
+        username: username,
+        email: FirebaseAuth.instance.currentUser!.email ?? email,
+        password: password,
+        phoneNumber: phoneNumber,
+        country: country,
+        city: city,
+        createdAt: userCreatedAt,
+        isOnline: false,
+      );
+      // check if the required user properties are empty
+      if (username.isNotEmpty &&
+          email.isNotEmpty &&
+          password.isNotEmpty &&
+          phoneNumber.isNotEmpty) {
+        //cache the id of the new user to shared preferences
+        userPrefs.setString("userId", userId);
+        final newPrefs = await SharedPreferences.getInstance();
+        newPrefs.setString('newUserId', userId);
+        // add the user
+        _users.add(user);
 
-      // Example using set() with a specific document ID
-      await _firestore.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).set(userData);
+        // Example using set() with a specific document ID
+        await _firestore
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .set(userData);
 
-      // notify listening widgets to rebuild
-      notifyListeners();
-      // check if the user has been added successfully
-      if (_users.contains(user)) {
-        return "User added successfully";
+        // notify listening widgets to rebuild
+        notifyListeners();
+        // check if the user has been added successfully
+        if (_users.contains(user)) {
+          return "User added successfully";
+        } else {
+          return "failed to add user";
+        }
       } else {
-        return "failed to add user";
+        return "no empty fields allowed";
       }
     } else {
-      return "no empty fields allowed";
-    }
-    }else{
       return "user already exists ";
     }
   }
 
   //method for login user
-  void loginUser(String email,String password) async{
+  void loginUser(String email, String password,BuildContext context) async {
     final userPrefs = await _prefs;
     final userId = userPrefs.getString("userId");
     final newPrefs = await SharedPreferences.getInstance();
     final newUserId = newPrefs.getString('newUserId');
-    if(email.isNotEmpty && password.isNotEmpty){
-        FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-        if(FirebaseAuth.instance.currentUser != null){
-          final collectionRef = FirebaseFirestore.instance.collection('users');
-          print(FirebaseAuth.instance.currentUser!.uid);
-          final docRef = collectionRef.doc(FirebaseAuth.instance.currentUser!.uid);
-          final docSnapshot = await docRef.get();
-          if(docSnapshot.exists){
-            final data = docSnapshot.data();
-            print(data);
-            await docRef.update({
-              'isOnline': true,
-            });
+    var user = FirebaseAuth.instance;
+    if (email.isNotEmpty && password.isNotEmpty) {
+      await user.signInWithEmailAndPassword(email: email, password: password);
+      if (user.currentUser != null) {
+        final collectionRef = FirebaseFirestore.instance.collection('users');
+        print(user.currentUser!.uid);
+        final docRef = collectionRef.doc(user.currentUser!.uid);
+        final docSnapshot = await docRef.get();
+        if (docSnapshot.exists) {
+          final data = docSnapshot.data();
+          print(data);
+          await docRef.update({'isOnline': true});
+          print('login successful');
+          Navigator.of(context).pushNamed('/home');
+        }else{
+          print('is online update failed');
         }
-      }else{
-        print("document not found");
+      } else {
+        print('login not successful');
       }
+    } else {
+      print('no null values');
     }
   }
 
@@ -246,20 +257,21 @@ class User with ChangeNotifier {
     }
   }
 
-  Future<String?> getUserName()async{
+  Future<String?> getUserName(String uid) async {
+    print('called get user name...');
     final collectionRef = FirebaseFirestore.instance.collection('users');
-    final newUserId = FirebaseAuth.instance.currentUser!.uid;
+    final newUserId = uid;
     print(newUserId);
     final docRef = collectionRef.doc(newUserId);
     final docSnapshot = await docRef.get();
-    if(docSnapshot.exists){
+    if (docSnapshot.exists) {
       final data = docSnapshot.data();
       print(data);
       print(data!['username']);
-      return  data!['username'] as String?;
-    }else{
+      return data['username'] as String?;
+    } else {
+      print('didnt get username');
       return 'null';
     }
-
   }
 }
