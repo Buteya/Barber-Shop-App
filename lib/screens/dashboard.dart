@@ -107,7 +107,10 @@ class _DashboardState extends State<Dashboard> {
               title: const Text('create barber'),
               onTap: () {
                 // Handle item 2 tap
-                Navigator.pop(context); // Close the drawer
+
+                  Navigator.of(context).pushNamed('/createbarberhome');
+
+                // Navigator.pop(context); // Close the drawer
               },
             ),
             ListTile(

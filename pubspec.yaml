@@ -46,6 +46,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   shared_preferences: ^2.5.3
   crypto: ^3.0.6
+  image_picker: ^1.2.0
 
 flutter_launcher_icons:
   android: "launcher_icon"

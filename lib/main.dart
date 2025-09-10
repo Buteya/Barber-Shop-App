@@ -1,4 +1,6 @@
 import 'package:barbershop/screens/404.dart';
+import 'package:barbershop/screens/createbarber.dart';
+import 'package:barbershop/screens/createbarberhome.dart';
 import 'package:barbershop/screens/dashboard.dart';
 import 'package:barbershop/screens/home.dart';
 import 'package:barbershop/screens/login.dart';
@@ -40,13 +42,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/signin',
+      initialRoute: '/login',
       routes: {
         '/signin': (context) => SignIn(),
         '/login': (context) => Login(),
         '/home': (context) => Home(),
         '/pagenotfound': (context) => PageNotFound(),
         '/dashboard': (context) => Dashboard(),
+        '/createbarber': (context) => CreateBarber(),
+        '/createbarberhome': (context) => CreateBarberHome(),
       },
       title: 'Barber Shop',
       theme: ThemeData(
