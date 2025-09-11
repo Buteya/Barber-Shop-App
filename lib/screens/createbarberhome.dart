@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,9 @@ class CreateBarberHome extends StatefulWidget {
 
 class _CreateBarberHomeState extends State<CreateBarberHome> {
   late Future<List<Map<String, dynamic>>> _usersFuture;
+  TextEditingController searchTerm = TextEditingController();
+  late List<Map<String,dynamic>> _searchedUsers;
+  List<Map<String,dynamic>> newList=[];
   User? user = FirebaseAuth.instance.currentUser;
   final usrR = usr.User(
     id: '',
@@ -22,6 +27,7 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
   );
   String username = '';
   bool isUsername = false;
+  bool isSearching = false;
 
   Future<void> getUser() async {
     setState(() {
@@ -53,6 +59,10 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
         usersData.add(document.data() as Map<String, dynamic>);
         // You can also access the document ID: print(document.id);
       }
+      if(usersData.isNotEmpty){
+        newList = usersData;
+      }
+
       print(usersData);
       return usersData;
     } catch (e) {
@@ -61,8 +71,29 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
     }
   }
 
+  void searchUsers(String search)async{
+
+      setState(() {
+        isSearching = true;
+      });
+      print(search);
+
+      print('search User called');
+      _searchedUsers = await _usersFuture;
+      print(_searchedUsers);
+      setState(() {
+        newList = _searchedUsers.where((user)=>user['username'].toString().toLowerCase().contains(search)).toList();
+      });
+      print(_searchedUsers.where((userSs)=>userSs.toString().toLowerCase().contains(search)).length);
+      print(newList);
+      setState(() {
+        isSearching = false;
+      });
+
+  }
+
   @override
-  initState() {
+  initState()  {
     // TODO: implement initState
     super.initState();
     getUser();
@@ -119,8 +150,16 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
             padding: const EdgeInsets.symmetric(horizontal: 91.0),
             child: Center(
               child: SearchBar(
-                hintText: 'search user...',
-                trailing: [Icon(Icons.search_rounded)],
+                leading: Icon(Icons.search_rounded),
+                onSubmitted: (_){
+                  searchUsers(searchTerm.text);
+                },
+                onChanged: (value){
+                  searchUsers(value);
+                },
+                controller: searchTerm,
+                hintText: ' search user...',
+
               ),
             ),
           ),
@@ -139,7 +178,7 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
             child: SizedBox(
               height: MediaQuery.heightOf(context) * 0.6,
               child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: _usersFuture,
+                future: Future.value(newList),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
