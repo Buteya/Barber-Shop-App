@@ -103,6 +103,7 @@ class User with ChangeNotifier {
         'city': city,
         'createdAt': userCreatedAt,
         'isOnline': false,
+        'isBarber':false,
       };
 
       // variable to store user

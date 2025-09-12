@@ -15,8 +15,8 @@ class CreateBarberHome extends StatefulWidget {
 class _CreateBarberHomeState extends State<CreateBarberHome> {
   late Future<List<Map<String, dynamic>>> _usersFuture;
   TextEditingController searchTerm = TextEditingController();
-  late List<Map<String,dynamic>> _searchedUsers;
-  List<Map<String,dynamic>> newList=[];
+  late List<Map<String, dynamic>> _searchedUsers;
+  List<Map<String, dynamic>> newList = [];
   User? user = FirebaseAuth.instance.currentUser;
   final usrR = usr.User(
     id: '',
@@ -59,7 +59,7 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
         usersData.add(document.data() as Map<String, dynamic>);
         // You can also access the document ID: print(document.id);
       }
-      if(usersData.isNotEmpty){
+      if (usersData.isNotEmpty) {
         newList = usersData;
       }
 
@@ -71,29 +71,36 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
     }
   }
 
-  void searchUsers(String search)async{
+  void searchUsers(String search) async {
+    setState(() {
+      isSearching = true;
+    });
+    print(search);
 
-      setState(() {
-        isSearching = true;
-      });
-      print(search);
-
-      print('search User called');
-      _searchedUsers = await _usersFuture;
-      print(_searchedUsers);
-      setState(() {
-        newList = _searchedUsers.where((user)=>user['username'].toString().toLowerCase().contains(search)).toList();
-      });
-      print(_searchedUsers.where((userSs)=>userSs.toString().toLowerCase().contains(search)).length);
-      print(newList);
-      setState(() {
-        isSearching = false;
-      });
-
+    print('search User called');
+    _searchedUsers = await _usersFuture;
+    print(_searchedUsers);
+    setState(() {
+      newList = _searchedUsers
+          .where(
+            (user) =>
+                user['username'].toString().toLowerCase().contains(search),
+          )
+          .toList();
+    });
+    print(
+      _searchedUsers
+          .where((userSs) => userSs.toString().toLowerCase().contains(search))
+          .length,
+    );
+    print(newList);
+    setState(() {
+      isSearching = false;
+    });
   }
 
   @override
-  initState()  {
+  initState() {
     // TODO: implement initState
     super.initState();
     getUser();
@@ -151,15 +158,14 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
             child: Center(
               child: SearchBar(
                 leading: Icon(Icons.search_rounded),
-                onSubmitted: (_){
+                onSubmitted: (_) {
                   searchUsers(searchTerm.text);
                 },
-                onChanged: (value){
+                onChanged: (value) {
                   searchUsers(value);
                 },
                 controller: searchTerm,
                 hintText: ' search user...',
-
               ),
             ),
           ),
@@ -167,8 +173,11 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 91.0,vertical: 24.0),
-                child: Text('all users',),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 91.0,
+                  vertical: 24.0,
+                ),
+                child: Text('all users'),
               ),
             ],
           ),
@@ -195,13 +204,51 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
                           title: Text(snapshot.data![index]['username']),
                           subtitle: Text(snapshot.data![index]['email']),
                           trailing: InkWell(
-                            onTap: (){
-                              Navigator.of(context).pushNamed('/createbarber');
+                            onTap: () {
+                              if (snapshot.data![index]['isBarber']) {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Important Notice'),
+                                      content: Text(
+                                        'User is already a barber',
+                                      ),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: Text('Dismiss'),
+                                          onPressed: () {
+                                            Navigator.of(
+                                              context,
+                                            ).pop(); // Dismiss the dialog
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              } else {
+                                Navigator.of(context).pushNamed(
+                                  '/createbarber',
+                                  arguments: snapshot.data![index]['email'],
+                                );
+                              }
                             },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [Icon(Icons.edit), Text('make barber')],
-                            ),
+                            child: snapshot.data![index]['isBarber']
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.cut_rounded),
+                                      Text('barber'),
+                                    ],
+                                  )
+                                : Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.edit),
+                                      Text('make barber'),
+                                    ],
+                                  ),
                           ),
                         );
                       },

@@ -57,12 +57,13 @@ class Barber {
     String speciality,
     String email,
     double? salary,
-    String? password
   ) async {
     print('called newBarber');
     // check if values are empty
-    if (firstname.isNotEmpty &&
+    if (imagePath.isNotEmpty &&
+        firstname.isNotEmpty &&
         lastname.isNotEmpty &&
+        email.isNotEmpty &&
         speciality.isNotEmpty &&
         salary != 0) {
       // create new barber id
@@ -87,7 +88,6 @@ class Barber {
         isFired: false,
         createdAt: createdTime,
       );
-
       Map<String, dynamic> barberData = {
         'id': barberId,
         'imagePath': imagePath,
@@ -95,60 +95,41 @@ class Barber {
         'lastname': lastname,
         'speciality': speciality,
         'salary': salary,
-        'email':email,
+        'email': email,
         'isFree': false,
         'isOnHoliday': false,
         'isClockedIn': false,
         'isSuspended': false,
         'isFired': false,
+        'createdBy': _firebaseAuth.currentUser!.uid,
         'createdAt': createdTime,
       };
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
+
+      if (_firebaseAuth.currentUser!.uid.isNotEmpty) {
         // Example using set() with a specific document ID
         final collectionRef = _firestore.collection('users');
-        final docRef = collectionRef.where('email',isEqualTo: email);
+        final docRef = collectionRef.where('email', isEqualTo: email);
         final docSnapshot = await docRef.get();
-        if (docSnapshot.docs.isEmpty) {
-          var newUserUid;
-          _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password!).whenComplete((){
-            print(currentUser);
-            newUserUid = _firebaseAuth.currentUser!.uid;
-            print(newUserUid);
+        final documentId = docSnapshot.docs.first.id;
+        print(documentId.length);
+        print(documentId);
+        if (docSnapshot.docs.isNotEmpty) {
+          await collectionRef.doc(documentId).update({
+            'barberId': barberId,
+            'isBarber':true,
           });
-          final userId = Uuid().v4();
-          Map<String, dynamic> userData = {
-            'id': userId,
-            'imagePath':imagePath,
-            'username': '',
-            'email': email,
-            'password': password,
-            'phoneNumber': '',
-            'country': '',
-            'city': '',
-            'createdAt': createdTime,
-            'isOnline': false,
-          };
-          if(currentUser.uid != newUserUid){
-            await _firestore
-                .collection('users')
-                .doc(newUserUid)
-                .set(userData);
-          }else{
-            print('uids are equal');
-          }
-          var newEmail = await _firestore.collection('users').where('email',isEqualTo: email).get();
-         if(newEmail.docs.isNotEmpty){
-           await _firestore
-               .collection('barbers')
-               .doc(_firebaseAuth.currentUser!.uid)
-               .set(barberData);
-         }else{
-           print('email is empty in users');
-         }
 
-        }else{
-          print('got update users to make a barber for user with the $email');
+          await _firestore
+              .collection('barbers')
+              .doc(documentId)
+              .set(barberData);
+
+          final newBarber = await _firestore.collection('barbers').doc(documentId).get();
+          if(newBarber.exists){
+            print('barber created successfully');
+          }
+        } else {
+          print('cant find user with $email');
         }
       }
 

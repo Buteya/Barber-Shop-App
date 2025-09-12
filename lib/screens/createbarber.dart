@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:barbershop/screens/404.dart';
+import 'package:barbershop/screens/createbarberhome.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:barbershop/models/users.dart' as usr;
@@ -15,7 +17,9 @@ class CreateBarber extends StatefulWidget {
 }
 
 class _CreateBarberState extends State<CreateBarber> {
-  late XFile? _pickedImage = XFile('path');
+  final _firestore = FirebaseFirestore.instance;
+  late Object? arguments;
+  late XFile? _pickedImage = XFile('');
   final ImagePicker _imagePicker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
   User? user = FirebaseAuth.instance.currentUser;
@@ -42,6 +46,7 @@ class _CreateBarberState extends State<CreateBarber> {
   String? email;
   String? password;
   bool isUsername = false;
+  bool isImagePicked = true;
 
   Future<void> getUser() async {
     setState(() {
@@ -80,9 +85,10 @@ class _CreateBarberState extends State<CreateBarber> {
 
   @override
   Widget build(BuildContext context) {
+    arguments = ModalRoute.of(context)?.settings.arguments;
     return user == null
         ? PageNotFound()
-        : Scaffold(
+        : arguments == null? CreateBarberHome() :Scaffold(
             appBar: AppBar(
               actions: [
                 user != null
@@ -159,6 +165,24 @@ class _CreateBarberState extends State<CreateBarber> {
                           ),
                         ),
                       ),
+                      isImagePicked?SizedBox():Text('please pick barber image',style: TextStyle(color: Colors.red),),
+                      Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: TextFormField(
+                          initialValue: arguments.toString(),
+                          decoration: InputDecoration(labelText: 'Email'),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            return null;
+                          },
+                          onSaved: (value) {
+                            // Store the value, e.g., in a state variable or data model
+                            email = value;
+                          },
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.all(24.0),
                         child: TextFormField(
@@ -224,54 +248,28 @@ class _CreateBarberState extends State<CreateBarber> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: TextFormField(
-                          decoration: InputDecoration(labelText: 'Email'),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            // Store the value, e.g., in a state variable or data model
-                            email = value;
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: TextFormField(
-                          obscureText: true,
-                          decoration: InputDecoration(labelText: 'Password'),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            // Store the value, e.g., in a state variable or data model
-                            password = value;
-                          },
-                        ),
-                      ),
-                      Padding(
                         padding: const EdgeInsets.symmetric(vertical: 56.0),
                         child: ElevatedButton(
                           onPressed: () async {
+                            if(_pickedImage!.path.toString().isEmpty){
+                            setState(() {
+                              isImagePicked = false;
+                            });
+                          }
                             if (_formKey.currentState!.validate()) {
+
                               // All fields are valid, proceed to save or submit
                               _formKey.currentState!
                                   .save(); // Triggers onSaved callbacks
                               // Perform submission logic
                               print(_pickedImage!.path);
+
                               print(firstname);
                               print(lastname);
                               print(speciality);
                               print(salary);
                               print(email);
-                              print(password);
+
                               try {
                                 // Code that might throw an exception
                                 barber.newBarber(
@@ -281,8 +279,33 @@ class _CreateBarberState extends State<CreateBarber> {
                                   speciality!,
                                   email!,
                                   salary,
-                                  password,
                                 );
+                                final collectionRef = _firestore.collection('users');
+                                final docRef = collectionRef.where('email', isEqualTo: email);
+                                final docSnapshot = await docRef.get();
+                                final documentId = docSnapshot.docs.first.id;
+
+                                final newBarber = await _firestore.collection('barbers').doc(documentId).get();
+                                if(newBarber.exists){
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Text(
+                                        'barber created successfully',
+                                      ),
+                                      duration: const Duration(
+                                        seconds: 3,
+                                      ), // Optional: set duration
+                                      action: SnackBarAction(
+                                        // Optional: add an action button
+                                        label: 'Close',
+                                        onPressed: () {
+                                          // Perform an action when the "Undo" button is pressed
+                                          print('Close action performed!');
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                }
                               } on TimeoutException catch (e) {
                                 // Handles a specific type of exception (e.g., FormatException)
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -328,7 +351,7 @@ class _CreateBarberState extends State<CreateBarber> {
                               _formKey.currentState!.reset();
                             }
                           },
-                          child: Text("login"),
+                          child: Text("create"),
                         ),
                       ),
                     ],
