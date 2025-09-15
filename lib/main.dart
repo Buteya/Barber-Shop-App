@@ -1,6 +1,7 @@
 import 'package:barbershop/screens/404.dart';
 import 'package:barbershop/screens/createbarber.dart';
 import 'package:barbershop/screens/createbarberhome.dart';
+import 'package:barbershop/screens/createuser.dart';
 import 'package:barbershop/screens/dashboard.dart';
 import 'package:barbershop/screens/home.dart';
 import 'package:barbershop/screens/login.dart';
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => Dashboard(),
         '/createbarber': (context) => CreateBarber(),
         '/createbarberhome': (context) => CreateBarberHome(),
+        '/createuser': (context) => CreateUser(),
       },
       title: 'Barber Shop',
       theme: ThemeData(

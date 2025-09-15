@@ -88,7 +88,9 @@ class _CreateBarberState extends State<CreateBarber> {
     arguments = ModalRoute.of(context)?.settings.arguments;
     return user == null
         ? PageNotFound()
-        : arguments == null? CreateBarberHome() :Scaffold(
+        : arguments == null
+        ? CreateBarberHome()
+        : Scaffold(
             appBar: AppBar(
               actions: [
                 user != null
@@ -165,7 +167,12 @@ class _CreateBarberState extends State<CreateBarber> {
                           ),
                         ),
                       ),
-                      isImagePicked?SizedBox():Text('please pick barber image',style: TextStyle(color: Colors.red),),
+                      isImagePicked
+                          ? SizedBox()
+                          : Text(
+                              'please pick barber image',
+                              style: TextStyle(color: Colors.red),
+                            ),
                       Padding(
                         padding: const EdgeInsets.all(24.0),
                         child: TextFormField(
@@ -251,13 +258,12 @@ class _CreateBarberState extends State<CreateBarber> {
                         padding: const EdgeInsets.symmetric(vertical: 56.0),
                         child: ElevatedButton(
                           onPressed: () async {
-                            if(_pickedImage!.path.toString().isEmpty){
-                            setState(() {
-                              isImagePicked = false;
-                            });
-                          }
+                            if (_pickedImage!.path.toString().isEmpty) {
+                              setState(() {
+                                isImagePicked = false;
+                              });
+                            }
                             if (_formKey.currentState!.validate()) {
-
                               // All fields are valid, proceed to save or submit
                               _formKey.currentState!
                                   .save(); // Triggers onSaved callbacks
@@ -280,13 +286,21 @@ class _CreateBarberState extends State<CreateBarber> {
                                   email!,
                                   salary,
                                 );
-                                final collectionRef = _firestore.collection('users');
-                                final docRef = collectionRef.where('email', isEqualTo: email);
+                                final collectionRef = _firestore.collection(
+                                  'users',
+                                );
+                                final docRef = collectionRef.where(
+                                  'email',
+                                  isEqualTo: email,
+                                );
                                 final docSnapshot = await docRef.get();
                                 final documentId = docSnapshot.docs.first.id;
 
-                                final newBarber = await _firestore.collection('barbers').doc(documentId).get();
-                                if(newBarber.exists){
+                                final newBarber = await _firestore
+                                    .collection('barbers')
+                                    .doc(documentId)
+                                    .get();
+                                if (newBarber.exists) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: const Text(

@@ -272,7 +272,8 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
               title: const Text('create user'),
               onTap: () {
                 // Handle item 1 tap
-                Navigator.pop(context); // Close the drawer
+                Navigator.of(context).pushNamed('/createuser');
+                // Navigator.pop(context); // Close the drawer
               },
             ),
             ListTile(
