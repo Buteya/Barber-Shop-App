@@ -1,5 +1,7 @@
 import 'dart:ffi';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +9,7 @@ import 'package:intl/intl.dart';
 class Product {
   String? id;
   String? supplierId;
+  String? imagePath;
   String? name;
   Double? price;
   Int? quantity;
@@ -17,6 +20,7 @@ class Product {
   Product({
     @required id,
     @required supplierId,
+    @required imagePath,
     @required name,
     @required price,
     @required quantity,
@@ -31,15 +35,22 @@ class Product {
   List<Product> allProducts() {
     return products;
   }
+  // firestore instance
+  final _firestore = FirebaseFirestore.instance;
+
+  // firebase auth instance
+  final _firebaseAuth = FirebaseAuth.instance;
 
   // function to create new product
-  String createNewProduct(
-      String supplierId,
+  Future<String> createNewProduct(
+    String supplierId,
+    String imagePath,
     String name,
     Double price,
     int quantity,
-  ) {
-    if ( supplierId.isNotEmpty &&
+  ) async {
+    if (supplierId.isNotEmpty &&
+        imagePath.isNotEmpty &&
         name.isNotEmpty &&
         price != 0.0 &&
         quantity != 0) {
@@ -60,7 +71,36 @@ class Product {
         isAvailable: true,
         isDiscounted: false,
         createdAt: dateCreated,
+        imagePath: imagePath,
       );
+
+      final productData = {
+        'id': productId,
+        'supplierId': supplierId,
+        'name': name,
+        'price': price,
+        'quantity': quantity,
+        'isAvailable': true,
+        'isDiscounted': false,
+        'createdAt': dateCreated,
+        'imagePath': imagePath,
+      };
+
+      await _firestore
+          .collection('products')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .set(productData);
+
+      final product = await _firestore
+          .collection('products')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .get();
+      if(product.data()!.containsValue(productId)){
+        print(product.data());
+      }else{
+        print('failed to add product');
+      }
+
       // returning the product if found that is equivalent to the new product
       final productCheck = products.firstWhere((product) {
         return product.id == productId;
