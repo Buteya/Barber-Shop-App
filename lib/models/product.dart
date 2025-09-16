@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -11,10 +9,10 @@ class Product {
   String? supplierId;
   String? imagePath;
   String? name;
-  Double? price;
-  Int? quantity;
-  Bool? isAvailable;
-  Bool? isDiscounted;
+  double? price;
+  int? quantity;
+  bool? isAvailable;
+  bool? isDiscounted;
   DateTime? createdAt;
 
   Product({
@@ -46,7 +44,7 @@ class Product {
     String supplierId,
     String imagePath,
     String name,
-    Double price,
+    double price,
     int quantity,
   ) async {
     if (supplierId.isNotEmpty &&
@@ -122,14 +120,14 @@ class Product {
     int index, [
     String? name,
     String? supplierName,
-    Double? price,
+    double? price,
     int? quantity,
   ]) {
     // check if product exists
     if (products.contains(products[index])) {
       products[index].name = name ?? products[index].name;
-      products[index].price = price ?? products[index].price;
-      products[index].quantity = (quantity ?? products[index].quantity) as Int?;
+      products[index].price = (price ?? products[index].price);
+      products[index].quantity = (quantity ?? products[index].quantity);
       // check if product updated
       if (products[index].name == name ||
           products[index].price == price ||

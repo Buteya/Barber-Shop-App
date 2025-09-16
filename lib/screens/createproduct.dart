@@ -126,137 +126,180 @@ class _CreateProductState extends State<CreateProduct> {
           ],
         ),
       ),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 108),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: MediaQuery.widthOf(context) * 0.2,
-                backgroundImage: NetworkImage(_pickedImage!.path),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: InkWell(
-                  onTap: () {
-                    _pickImageFromGallery();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [Icon(Icons.image_rounded), Text('pick image')],
+      body: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 108),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: MediaQuery.widthOf(context) * 0.2,
+                  backgroundImage: NetworkImage(_pickedImage!.path),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: InkWell(
+                    onTap: () {
+                      _pickImageFromGallery();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [Icon(Icons.image_rounded), Text('pick image')],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              isImagePicked
-                  ? SizedBox()
-                  : Text(
-                      'please pick barber image',
-                      style: TextStyle(color: Colors.red),
-                    ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Supplier'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your supplier';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  // Store the value, e.g., in a state variable or data model
-                  supplierName = value!;
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Product Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter product name';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  // Store the value, e.g., in a state variable or data model
-                  productName = value;
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Price'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter price';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  // Store the value, e.g., in a state variable or data model
-                  productPrice = double.tryParse(value!);
-                },
-              ),
-              TextFormField(
-                obscureText: true,
-                decoration: InputDecoration(labelText: 'Quantity'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter quantity';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  // Store the value, e.g., in a state variable or data model
-                  productQuantity = double.tryParse(value!);
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      // All fields are valid, proceed to save or submit
-                      _formKey.currentState!
-                          .save(); // Triggers onSaved callbacks
-                      // Perform submission logic
-
-                      print(supplierName);
-                      print(productName);
-                      print(productPrice);
-                      print(productQuantity);
-                      print(_pickedImage!.path);
-                      try {
-                        setState(() {
-                          isLoading = true;
-                        });
-
-                        // // Code that might throw an exception
-                        productModel.createNewProduct(
-                          productId,
-                          _pickedImage.path,
-                          productName,
-                          productPrice,
-                          productQuantity,
-                        );
-                        final collectionRef = _firestore.collection('products');
-                        final docRef = collectionRef.where(
-                          'id',
-                          isEqualTo: productId,
-                        );
-                        final docSnapshot = await docRef.get();
-                        final document = docSnapshot.docs.first.data();
-                        print(document);
-
-
-                        if (document.isNotEmpty) {
+                isImagePicked
+                    ? SizedBox()
+                    : Text(
+                        'please pick barber image',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Supplier'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your supplier';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    // Store the value, e.g., in a state variable or data model
+                    supplierName = value!;
+                  },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Product Name'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter product name';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    // Store the value, e.g., in a state variable or data model
+                    productName = value;
+                  },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Price'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter price';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    // Store the value, e.g., in a state variable or data model
+                    productPrice = double.tryParse(value!);
+                  },
+                ),
+                TextFormField(
+                  obscureText: true,
+                  decoration: InputDecoration(labelText: 'Quantity'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter quantity';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    // Store the value, e.g., in a state variable or data model
+                    productQuantity = double.tryParse(value!);
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        // All fields are valid, proceed to save or submit
+                        _formKey.currentState!
+                            .save(); // Triggers onSaved callbacks
+                        // Perform submission logic
+        
+                        print(supplierName);
+                        print(productName);
+                        print(productPrice);
+                        print(productQuantity);
+                        print(_pickedImage!.path);
+                        try {
                           setState(() {
-                            isLoading = false;
+                            isLoading = true;
                           });
-
+        
+                          // // Code that might throw an exception
+                          productModel.createNewProduct(
+                            productId,
+                            _pickedImage.path,
+                            productName,
+                            productPrice,
+                            productQuantity,
+                          );
+                          final collectionRef = _firestore.collection('products');
+                          final docRef = collectionRef.where(
+                            'id',
+                            isEqualTo: productId,
+                          );
+                          final docSnapshot = await docRef.get();
+                          final document = docSnapshot.docs.first.data();
+                          print(document);
+        
+        
+                          if (document.isNotEmpty) {
+                            setState(() {
+                              isLoading = false;
+                            });
+        
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('product created successfully'),
+                                duration: const Duration(
+                                  seconds: 3,
+                                ), // Optional: set duration
+                                action: SnackBarAction(
+                                  // Optional: add an action button
+                                  label: 'Undo',
+                                  onPressed: () {
+                                    // Perform an action when the "Undo" button is pressed
+                                    print('Undo action performed!');
+                                  },
+                                ),
+                              ),
+                            );
+                          }
+                        } on TimeoutException catch (e) {
+                          // Handles a specific type of exception (e.g., FormatException)
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text('product created successfully'),
+                              content: const Text(
+                                'request timed out check internet!',
+                              ),
+                              duration: const Duration(
+                                seconds: 3,
+                              ), // Optional: set duration
+                              action: SnackBarAction(
+                                // Optional: add an action button
+                                label: 'Undo',
+                                onPressed: () {
+                                  // Perform an action when the "Undo" button is pressed
+                                  print('Undo action performed!');
+                                },
+                              ),
+                            ),
+                          );
+                        } catch (e) {
+                          // Catches any other type of exception or error
+                          print('Caught generic exception: $e');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'failed to create  product, error: ${e.toString()}',
+                              ),
                               duration: const Duration(
                                 seconds: 3,
                               ), // Optional: set duration
@@ -271,55 +314,14 @@ class _CreateProductState extends State<CreateProduct> {
                             ),
                           );
                         }
-                      } on TimeoutException catch (e) {
-                        // Handles a specific type of exception (e.g., FormatException)
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                              'request timed out check internet!',
-                            ),
-                            duration: const Duration(
-                              seconds: 3,
-                            ), // Optional: set duration
-                            action: SnackBarAction(
-                              // Optional: add an action button
-                              label: 'Undo',
-                              onPressed: () {
-                                // Perform an action when the "Undo" button is pressed
-                                print('Undo action performed!');
-                              },
-                            ),
-                          ),
-                        );
-                      } catch (e) {
-                        // Catches any other type of exception or error
-                        print('Caught generic exception: $e');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'failed to create  product, error: ${e.toString()}',
-                            ),
-                            duration: const Duration(
-                              seconds: 3,
-                            ), // Optional: set duration
-                            action: SnackBarAction(
-                              // Optional: add an action button
-                              label: 'Undo',
-                              onPressed: () {
-                                // Perform an action when the "Undo" button is pressed
-                                print('Undo action performed!');
-                              },
-                            ),
-                          ),
-                        );
+                        _formKey.currentState!.reset();
                       }
-                      _formKey.currentState!.reset();
-                    }
-                  },
-                  child: Text('create'),
+                    },
+                    child: Text('create'),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
