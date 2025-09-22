@@ -1,31 +1,24 @@
 import 'dart:async';
 
-import 'package:barbershop/models/product.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:uuid/uuid.dart';
 
 import '../models/users.dart' as usr;
 
-class CreateProduct extends StatefulWidget {
-  const CreateProduct({super.key});
+class CreateSpeciality extends StatefulWidget {
+  const CreateSpeciality({super.key});
 
   @override
-  State<CreateProduct> createState() => _CreateProductState();
+  State<CreateSpeciality> createState() => _CreateSpecialityState();
 }
 
-class _CreateProductState extends State<CreateProduct> {
-  final _formKey = GlobalKey<FormState>();
-  late XFile _pickedImage = XFile('');
-  final ImagePicker _imagePicker = ImagePicker();
+class _CreateSpecialityState extends State<CreateSpeciality> {
   final _firestore = FirebaseFirestore.instance;
-  final productId = Uuid().v4();
-  var supplierName;
-  var productName;
-  var productPrice;
-  var productQuantity;
+  var speciality;
+  var price;
+  bool isLoading = false;
+  final _formKey = GlobalKey<FormState>();
   User? user = FirebaseAuth.instance.currentUser;
   final usrR = usr.User(
     id: '',
@@ -34,18 +27,8 @@ class _CreateProductState extends State<CreateProduct> {
     password: '',
     phoneNumber: '',
   );
-  final productModel = Product(
-    id: '',
-    supplierId: '',
-    imagePath: '',
-    name: '',
-    price: 0.0,
-    quantity: 0.0,
-  );
   String username = '';
   bool isUsername = false;
-  bool isLoading = false;
-  bool isImagePicked = true;
 
   Future<void> getUser() async {
     setState(() {
@@ -62,19 +45,6 @@ class _CreateProductState extends State<CreateProduct> {
     });
   }
 
-  Future<void> _pickImageFromGallery() async {
-    final XFile? image = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (image != null) {
-      // Use the picked image, e.g., display it or upload it
-      // image.path contains the path to the selected image
-      setState(() {
-        _pickedImage = image;
-      });
-    }
-  }
-
   @override
   initState() {
     // TODO: implement initState
@@ -89,25 +59,27 @@ class _CreateProductState extends State<CreateProduct> {
         actions: [
           user != null
               ? InkWell(
-                  onTap: () {
-                    Navigator.of(context).pushNamed('/dashboard');
-                  },
-                  child: Row(
-                    children: [
-                      isUsername
-                          ? Center(child: CircularProgressIndicator())
-                          : Text(username),
-                      SizedBox(width: MediaQuery.widthOf(context) * 0.01),
-                      InkWell(child: CircleAvatar(child: Icon(Icons.person))),
-                    ],
-                  ),
-                )
-              : InkWell(
-                  onTap: () {
-                    Navigator.of(context).pushNamed('/login');
-                  },
-                  child: Text('login'),
+            onTap: () {
+              Navigator.of(context).pushNamed('/dashboard');
+            },
+            child: Row(
+              children: [
+                isUsername
+                    ? Center(child: CircularProgressIndicator())
+                    : Text(username),
+                SizedBox(width: MediaQuery.widthOf(context) * 0.01),
+                InkWell(
+                  child: CircleAvatar(child: Icon(Icons.person)),
                 ),
+              ],
+            ),
+          )
+              : InkWell(
+            onTap: () {
+              Navigator.of(context).pushNamed('/login');
+            },
+            child: Text('login'),
+          ),
           SizedBox(width: MediaQuery.widthOf(context) * .02),
         ],
         automaticallyImplyLeading: true,
@@ -119,14 +91,16 @@ class _CreateProductState extends State<CreateProduct> {
           children: [
             CircleAvatar(
               radius: MediaQuery.widthOf(context) * .03,
-              backgroundImage: AssetImage('assets/images/barber shop logo.png'),
+              backgroundImage: AssetImage(
+                'assets/images/barber shop logo.png',
+              ),
             ),
             SizedBox(width: MediaQuery.widthOf(context) * 0.01),
             Text('Barber shop'),
           ],
         ),
       ),
-      body: SingleChildScrollView(
+     body:  SingleChildScrollView(
         child: Form(
           key: _formKey,
           child: Padding(
@@ -134,84 +108,33 @@ class _CreateProductState extends State<CreateProduct> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircleAvatar(
-                  radius: MediaQuery.widthOf(context) * 0.2,
-                  backgroundImage: NetworkImage(_pickedImage!.path),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: InkWell(
-                    onTap: () {
-                      _pickImageFromGallery();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [Icon(Icons.image_rounded), Text('pick image')],
-                      ),
-                    ),
-                  ),
-                ),
-                isImagePicked
-                    ? SizedBox()
-                    : Text(
-                        'please pick barber image',
-                        style: TextStyle(color: Colors.red),
-                      ),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Supplier'),
+                  decoration: InputDecoration(labelText: 'Speciality'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your supplier';
+                      return 'Please enter speciality';
                     }
                     return null;
                   },
                   onSaved: (value) {
                     // Store the value, e.g., in a state variable or data model
-                    supplierName = value!;
+                    speciality = value!;
                   },
                 ),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Product Name'),
+                  decoration: InputDecoration(labelText: 'price'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter product name';
+                      return 'Please enter your phone number';
                     }
                     return null;
                   },
                   onSaved: (value) {
                     // Store the value, e.g., in a state variable or data model
-                    productName = value;
+                    price = double.tryParse(value!);
                   },
                 ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Price'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter price';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    // Store the value, e.g., in a state variable or data model
-                    productPrice = double.tryParse(value!);
-                  },
-                ),
-                TextFormField(
-                  obscureText: true,
-                  decoration: InputDecoration(labelText: 'Quantity'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter quantity';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    // Store the value, e.g., in a state variable or data model
-                    productQuantity = double.tryParse(value!);
-                  },
-                ),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: ElevatedButton(
@@ -221,43 +144,44 @@ class _CreateProductState extends State<CreateProduct> {
                         _formKey.currentState!
                             .save(); // Triggers onSaved callbacks
                         // Perform submission logic
-        
-                        print(supplierName);
-                        print(productName);
-                        print(productPrice);
-                        print(productQuantity);
-                        print(_pickedImage!.path);
+
+                        print(speciality);
+                        print(price);
                         try {
                           setState(() {
                             isLoading = true;
                           });
-        
-                          // // Code that might throw an exception
-                          productModel.createNewProduct(
-                            productId,
-                            _pickedImage.path,
-                            productName,
-                            productPrice,
-                            productQuantity,
-                          );
-                          final collectionRef = _firestore.collection('products');
+                          // Code that might throw an exception
+                          // usrR.createNewUser(
+                          //   newUsername!,
+                          //   email!,
+                          //   password!,
+                          //   phoneNumber!,
+                          // );
+                          final collectionRef = _firestore.collection('users');
                           final docRef = collectionRef.where(
-                            'id',
-                            isEqualTo: productId,
+                            'email',
+                            isEqualTo: speciality,
                           );
                           final docSnapshot = await docRef.get();
-                          final document = docSnapshot.docs.first.data();
-                          print(document);
-        
-        
-                          if (document.isNotEmpty) {
+                          final documentId = docSnapshot.docs.first.id;
+                          print(documentId);
+
+                          // await _firestore
+                          //     .collection('users')
+                          //     .doc(documentId)
+                          //     .update({'imageUrl': _pickedImage!.path});
+
+                          if (docSnapshot.docs.isNotEmpty) {
                             setState(() {
                               isLoading = false;
                             });
-        
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: const Text('product created successfully'),
+                                content: const Text(
+                                  'speciality created successfully',
+                                ),
                                 duration: const Duration(
                                   seconds: 3,
                                 ), // Optional: set duration
@@ -298,7 +222,7 @@ class _CreateProductState extends State<CreateProduct> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'failed to create  product, error: ${e.toString()}',
+                                'failed to create speciality, error: ${e.toString()}',
                               ),
                               duration: const Duration(
                                 seconds: 3,

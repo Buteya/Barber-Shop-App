@@ -295,6 +295,14 @@ class _CreateBarberHomeState extends State<CreateBarberHome> {
               },
             ),
             ListTile(
+              title: const Text('create speciality'),
+              onTap: () {
+                // Handle item 2 tap
+                Navigator.of(context).pushNamed('/createspeciality');
+                // Navigator.pop(context); // Close the drawer
+              },
+            ),
+            ListTile(
               title: const Text('create appointment'),
               onTap: () {
                 // Handle item 2 tap

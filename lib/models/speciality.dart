@@ -1,4 +1,4 @@
-import 'dart:ffi';
+
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -6,11 +6,11 @@ import 'package:intl/intl.dart';
 
 class Speciality {
   String? id;
-  List<String>? barberId;
-  Double? price;
+  String? speciality;
+  double? price;
   DateTime? createdAt;
 
-  Speciality({@required id, @required barberId, @required price, createdAt});
+  Speciality({@required id, @required speciality, @required price, createdAt});
 
   //list of specialities
   List<Speciality> specialities = [];
@@ -21,9 +21,9 @@ class Speciality {
   }
 
   //create new speciality
-  String createNewSpeciality(List<String> barberId, Double price) {
+  String createNewSpeciality(String speciality, double price) {
     //check for empty values
-    if (barberId.isNotEmpty && price != 0.0) {
+    if (speciality.isNotEmpty && price != 0.0) {
       //create speciality id
       final specialityId = Uuid().v4();
       // create speciality time stamp
@@ -33,7 +33,7 @@ class Speciality {
       //constructor for new speciality
       final newSpeciality = Speciality(
         id: id,
-        barberId: barberId,
+        speciality: speciality,
         price: price,
         createdAt: createdAt,
       );
@@ -51,14 +51,14 @@ class Speciality {
   }
 
   //update speciality
-  String updateSpeciality(int index, [List<String>? barberId, Double? price]) {
+  String updateSpeciality(int index, [String? speciality, double? price]) {
     //check if speciality exists
     if (specialities.contains(specialities[index])) {
       // update speciality individual values
-      specialities[index].barberId = barberId ?? specialities[index].barberId;
+      specialities[index].speciality = speciality ?? specialities[index].speciality;
       specialities[index].price = price ?? specialities[index].price;
       //check if update was a success
-      if (specialities[index].barberId == barberId ||
+      if (specialities[index].speciality == speciality ||
           specialities[index].price == price) {
         return 'speciality was updated successfully';
       } else {
