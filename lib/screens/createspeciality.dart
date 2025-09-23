@@ -292,6 +292,14 @@ class _CreateSpecialityState extends State<CreateSpeciality> {
               },
             ),
             ListTile(
+              title: const Text('create supplier'),
+              onTap: () {
+                // Handle item 2 tap
+                Navigator.of(context).pushNamed('/createsupplier');
+                // Navigator.pop(context); // Close the drawer
+              },
+            ),
+            ListTile(
               title: const Text('create appointment'),
               onTap: () {
                 // Handle item 2 tap

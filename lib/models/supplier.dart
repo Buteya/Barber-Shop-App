@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 class Supplier {
   String? id;
   String? locationId;
+  String? locationName;
   List<String>? productId;
   String? name;
   String? mobileNumber;
@@ -15,6 +16,7 @@ class Supplier {
   Supplier({
     @required id,
     @required locationId,
+    @required locationName,
     @required productId,
     @required name,
     @required mobileNumber,
@@ -30,8 +32,9 @@ class Supplier {
   }
 
   // create a new supplier
-  String creatSupplier(
+  String createSupplier(
     String locationId,
+    String locationName,
     List<String> productId,
     String name,
     String mobileNumber,

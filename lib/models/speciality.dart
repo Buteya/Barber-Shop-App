@@ -1,5 +1,5 @@
-
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +12,12 @@ class Speciality {
 
   Speciality({@required id, @required speciality, @required price, createdAt});
 
+  // firestore instance
+  final _firestore = FirebaseFirestore.instance;
+
+  //firebase auth instance
+  final _firebaseAuth = FirebaseAuth.instance;
+
   //list of specialities
   List<Speciality> specialities = [];
 
@@ -21,7 +27,7 @@ class Speciality {
   }
 
   //create new speciality
-  String createNewSpeciality(String speciality, double price) {
+  Future<String> createNewSpeciality(String speciality, double price) async {
     //check for empty values
     if (speciality.isNotEmpty && price != 0.0) {
       //create speciality id
@@ -37,12 +43,34 @@ class Speciality {
         price: price,
         createdAt: createdAt,
       );
+
+      final specialityData = {
+        'id': specialityId,
+        'speciality': speciality,
+        'price': price,
+        'createdAt': createdAt,
+      };
+
+      _firestore
+          .collection('specialities')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .set(specialityData);
+
+      final docs = await _firestore.collection('specialities').get();
+
+      final docData = docs.docs.where((test)=>test.data().containsValue(specialityId));
+
+      if(docData.isNotEmpty){
+        print('speciality created successfully');
+      }else{
+        print('failed to create speciality');
+      }
       // add speciality
       specialities.add(newSpeciality);
       //check if speciality was created
-      if(specialities.contains(newSpeciality)){
+      if (specialities.contains(newSpeciality)) {
         return 'speciality created successfully';
-      }else {
+      } else {
         return 'failed to create speciality';
       }
     } else {
@@ -55,7 +83,8 @@ class Speciality {
     //check if speciality exists
     if (specialities.contains(specialities[index])) {
       // update speciality individual values
-      specialities[index].speciality = speciality ?? specialities[index].speciality;
+      specialities[index].speciality =
+          speciality ?? specialities[index].speciality;
       specialities[index].price = price ?? specialities[index].price;
       //check if update was a success
       if (specialities[index].speciality == speciality ||

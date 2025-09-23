@@ -199,7 +199,6 @@ class _CreateProductState extends State<CreateProduct> {
                   },
                 ),
                 TextFormField(
-                  obscureText: true,
                   decoration: InputDecoration(labelText: 'Quantity'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -223,10 +222,11 @@ class _CreateProductState extends State<CreateProduct> {
                         // Perform submission logic
         
                         print(supplierName);
+                        print(productId);
                         print(productName);
                         print(productPrice);
                         print(productQuantity);
-                        print(_pickedImage!.path);
+                        print(_pickedImage.path);
                         try {
                           setState(() {
                             isLoading = true;
@@ -364,6 +364,14 @@ class _CreateProductState extends State<CreateProduct> {
               onTap: () {
                 // Handle item 2 tap
                 Navigator.of(context).pushNamed('/createspeciality');
+                // Navigator.pop(context); // Close the drawer
+              },
+            ),
+            ListTile(
+              title: const Text('create supplier'),
+              onTap: () {
+                // Handle item 2 tap
+                Navigator.of(context).pushNamed('/createsupplier');
                 // Navigator.pop(context); // Close the drawer
               },
             ),
